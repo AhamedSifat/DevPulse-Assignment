@@ -21,13 +21,47 @@ const registerUser = async (req: Request, res: Response) => {
         statusCode: HTTP_STATUS.INTERNAL_SERVER_ERROR,
         message: error.message,
         success: false,
-        error: error.stack
+        errors: error.stack
       });
     }
 
   }
 };
 
+
+const loginUser = async (req: Request, res: Response) => {
+  try {
+    const result = await authService.loginUserFromDb(req.body);
+
+    res.cookie('refreshToken', result.refreshToken, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === 'production',
+      sameSite: 'strict',
+    });
+
+    sendResponse(res, {
+      statusCode: HTTP_STATUS.OK,
+      message: "Login successful",
+      success: true,
+      data: {
+        user: result.data,
+        token: result.accessToken,
+      }
+    });
+
+  } catch (error) {
+    if (error instanceof Error) {
+      sendResponse(res, {
+        statusCode: HTTP_STATUS.INTERNAL_SERVER_ERROR,
+        message: error.message,
+        success: false,
+        errors: error.stack
+      });
+    }
+  }
+}
+
 export const authController = {
   registerUser,
+  loginUser
 };
