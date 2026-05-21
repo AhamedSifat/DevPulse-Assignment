@@ -3,14 +3,22 @@ import { pool } from "../../db";
 import jwt from "jsonwebtoken";
 import type { IUser } from "./auth.interface";
 import env from "../../config/env";
+import { HTTP_STATUS } from "../../config/httpStatus";
+import AppError from "../../utils/AppError";
 
 const registerUserIntoDb = async (playload: IUser) => {
   const { name, email, password, role } = playload;
   if (!name || !email || !password || !role) {
-    throw new Error('Name, email, password, and role are required');
+    throw new AppError(
+      HTTP_STATUS.BAD_REQUEST,
+      'Name, email, password, and role are required'
+    );
   }
   if (!['contributor', 'maintainer'].includes(role)) {
-    throw new Error('Role must be either contributor or maintainer');
+    throw new AppError(
+      HTTP_STATUS.BAD_REQUEST,
+      'Role must be either contributor or maintainer'
+    );
   }
 
   const hashedPassword = await bcrypt.hash(String(password), 10);
@@ -25,18 +33,28 @@ const registerUserIntoDb = async (playload: IUser) => {
 const loginUserFromDb = async (payload: { email: string; password: string }) => {
   const { email, password } = payload;
   if (!email || !password) {
-    throw new Error('Email and password are required');
+    throw new AppError(
+      HTTP_STATUS.BAD_REQUEST,
+      'Email and password are required'
+    );
   }
 
   const isUserExit = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
   if (isUserExit.rows.length === 0) {
-    throw new Error('Invalid email or password');
+    throw new AppError(
+      HTTP_STATUS.NOT_FOUND,
+      'User not found'
+    );
   }
 
   const user = isUserExit.rows[0];
   const isPasswordMatch = await bcrypt.compare(String(password), user.password);
+
   if (!isPasswordMatch) {
-    throw new Error('Invalid email or password');
+    throw new AppError(
+      HTTP_STATUS.UNAUTHORIZED,
+      'Invalid password'
+    );
   }
 
   const jwtPayload = {
