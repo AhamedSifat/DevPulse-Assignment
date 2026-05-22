@@ -30,12 +30,16 @@ const createIssue = catchAsync(async (req: Request, res: Response) => {
 });
 
 const getIssues = catchAsync(async (req: Request, res: Response) => {
-  const result = await issueService.getIssuesFromDb()
-  console.log(result)
+  const { sort = 'newest', type, status } = req.query;
+
+  const result = await issueService.getIssuesFromDb({
+    sort: sort as string,
+    type: type as string | undefined,
+    status: status as string | undefined,
+  })
   sendResponse(res, {
     statusCode: HTTP_STATUS.OK,
     success: true,
-    message: "Issues retrieved successfully",
     data: result
   })
 }

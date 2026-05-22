@@ -3,7 +3,7 @@ import type { HTTP_STATUS } from '../config/httpStatus';
 
 type TResponse<T> = {
   statusCode: typeof HTTP_STATUS[keyof typeof HTTP_STATUS];
-  message: string;
+  message?: string;
   success: boolean;
   data?: T;
   errors?: any;

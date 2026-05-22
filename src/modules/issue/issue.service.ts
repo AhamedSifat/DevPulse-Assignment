@@ -1,6 +1,6 @@
 import { pool } from "../../db";
 import AppError from './../../utils/AppError';
-import type { CreateIssuePayload } from "./issue.interface";
+import type { CreateIssuePayload, IssueFilters } from "./issue.interface";
 
 
 
@@ -21,12 +21,37 @@ const createIssueIntoDb = async (payload: CreateIssuePayload) => {
 
 }
 
-const getIssuesFromDb = async () => {
-  const issuesResult = await pool.query(
-    "SELECT * FROM issues ORDER BY created_at DESC"
-  );
+const getIssuesFromDb = async (filters: IssueFilters) => {
+  const { sort = 'newest', type, status } = filters;
 
+  let query = "SELECT * FROM issues";
+  const params: any[] = [];
+  const conditions: string[] = [];
+
+  if (type) {
+    params.push(type);
+    conditions.push(`type = $${params.length}`);
+  }
+
+  if (status) {
+    params.push(status);
+    conditions.push(`status = $${params.length}`);
+  }
+
+  if (conditions.length) {
+    query += " WHERE " + conditions.join(" AND ");
+  }
+
+  if (sort === 'newest') {
+    query += " ORDER BY created_at DESC";
+  } else if (sort === 'oldest') {
+    query += " ORDER BY created_at ASC";
+  }
+
+  const issuesResult = await pool.query(query, params);
   const issues = issuesResult.rows;
+
+  if (issues.length === 0) return [];
 
   const reporterIds = [...new Set(issues.map(issue => issue.reporter_id))];
 
