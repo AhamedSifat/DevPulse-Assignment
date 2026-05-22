@@ -55,6 +55,7 @@ const updateIssueIntoDb = async (id: string, payload: Partial<CreateIssuePayload
     "UPDATE issues SET title = COALESCE($1, title), description = COALESCE($2, description), type = COALESCE($3, type), updated_at = NOW() WHERE reporter_id = $4 RETURNING *",
     [title, description, type, id]
   );
+  delete update.rows[0].password;
   return update.rows[0];
 }
 
