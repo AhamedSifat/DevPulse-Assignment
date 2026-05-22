@@ -56,8 +56,20 @@ const getIssueById = catchAsync(async (req: Request, res: Response) => {
   })
 });
 
+const deleteIssue = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  await issueService.deleteIssueFromDb(id as string);
+
+  sendResponse(res, {
+    statusCode: HTTP_STATUS.OK,
+    success: true,
+    message: "Issue deleted successfully"
+  })
+});
+
 export const issueController = {
   createIssue
   , getIssues
   , getIssueById
+  , deleteIssue
 }
