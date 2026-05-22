@@ -13,14 +13,14 @@ const globalErrorHandler = (
     return res.status(error.statusCode).json({
       success: false,
       message: error.message,
-      errors: error.stack,
+      errors: error.message,
     });
   }
 
   return res.status(HTTP_STATUS.INTERNAL_SERVER_ERROR).json({
     success: false,
     message: error.message || 'Internal Server Error',
-    errors: error.stack,
+    errors: error.message,
 
   });
 };

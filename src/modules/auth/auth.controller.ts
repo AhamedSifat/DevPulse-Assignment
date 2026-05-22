@@ -3,9 +3,16 @@ import { authService } from "./auth.service";
 import sendResponse from "../../utils/sendResposne";
 import { HTTP_STATUS } from "../../config/httpStatus";
 import catchAsync from "../../utils/catchAsync";
+import AppError from "../../utils/AppError";
 
 const registerUser = catchAsync(async (req: Request, res: Response) => {
 
+  if (!req.body || Object.keys(req.body).length === 0) {
+    throw new AppError(
+      HTTP_STATUS.BAD_REQUEST,
+      'Request body is required'
+    );
+  }
   const result = await authService.registerUserIntoDb(req.body);
 
 
@@ -20,6 +27,14 @@ const registerUser = catchAsync(async (req: Request, res: Response) => {
 
 
 const loginUser = catchAsync(async (req: Request, res: Response) => {
+
+
+  if (!req.body || Object.keys(req.body).length === 0) {
+    throw new AppError(
+      HTTP_STATUS.BAD_REQUEST,
+      'Request body is required'
+    );
+  }
 
   const result = await authService.loginUserFromDb(req.body);
 
