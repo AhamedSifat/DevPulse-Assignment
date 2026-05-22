@@ -4,6 +4,7 @@ import sendResponse from "../../utils/sendResposne";
 import { issueService } from "./issue.service";
 import AppError from "../../utils/AppError";
 import { HTTP_STATUS } from "../../config/httpStatus";
+import type { Usertype } from "../../types";
 
 
 const createIssue = catchAsync(async (req: Request, res: Response) => {
@@ -25,6 +26,30 @@ const createIssue = catchAsync(async (req: Request, res: Response) => {
     statusCode: 201,
     success: true,
     message: "Issue created successfully",
+    data: result
+  })
+});
+
+const updateIssue = catchAsync(async (req: Request, res: Response) => {
+  const { id } = req.params;
+  const user = req.user;
+
+  if (!user) {
+    throw new AppError(HTTP_STATUS.UNAUTHORIZED, "Unauthorized");
+  }
+
+  if (!req.body) {
+    throw new AppError(
+      HTTP_STATUS.BAD_REQUEST,
+      'Request body is required'
+    );
+  }
+  const result = await issueService.updateIssueIntoDb(id as string, req.body, user as Omit<Usertype, 'password'>);
+
+  sendResponse(res, {
+    statusCode: HTTP_STATUS.OK,
+    success: true,
+    message: "Issue updated successfully",
     data: result
   })
 });
@@ -71,5 +96,6 @@ export const issueController = {
   createIssue
   , getIssues
   , getIssueById
+  , updateIssue
   , deleteIssue
 }

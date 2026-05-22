@@ -1,4 +1,6 @@
+import { HTTP_STATUS } from "../../config/httpStatus";
 import { pool } from "../../db";
+import type { Usertype } from "../../types";
 import AppError from './../../utils/AppError';
 import type { CreateIssuePayload, IssueFilters } from "./issue.interface";
 
@@ -19,6 +21,41 @@ const createIssueIntoDb = async (payload: CreateIssuePayload) => {
   );
   return issue.rows[0];
 
+}
+
+const updateIssueIntoDb = async (id: string, payload: Partial<CreateIssuePayload>, user: Omit<Usertype, 'password'>) => {
+  const { title, description, type } = payload
+
+  const existingIssueResult = await pool.query("SELECT * FROM issues WHERE id = $1", [id]);
+
+  if (existingIssueResult.rows.length === 0) {
+    throw new AppError(HTTP_STATUS.NOT_FOUND, "Issue not found");
+
+  }
+  const isMaintainer = user.role === "maintainer";
+  const isOwner = existingIssueResult.rows[0].reporter_id === user.id;
+
+  if (!isMaintainer) {
+    if (!isOwner) {
+      throw new AppError(403, "You cannot update this issue");
+    }
+
+    if (existingIssueResult.rows[0].status !== "open") {
+      throw new AppError(403, "Only open issues can be updated");
+    }
+  }
+
+
+  if (type && !['bug', 'feature_request'].includes(type)) {
+    throw new AppError(HTTP_STATUS.BAD_REQUEST, "Invalid issue type. Must be 'bug' or 'feature_request'")
+  }
+
+
+  const update = await pool.query(
+    "UPDATE issues SET title = COALESCE($1, title), description = COALESCE($2, description), type = COALESCE($3, type), updated_at = NOW() WHERE reporter_id = $4 RETURNING *",
+    [title, description, type, id]
+  );
+  return update.rows[0];
 }
 
 const getIssuesFromDb = async (filters: IssueFilters) => {
@@ -130,4 +167,5 @@ export const issueService = {
   , getIssuesFromDb
   , getIssueByIdFromDb
   , deleteIssueFromDb
+  , updateIssueIntoDb
 }
