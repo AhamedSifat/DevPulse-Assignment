@@ -1,4 +1,4 @@
-import { type Request, type Response } from 'express';
+import { type NextFunction, type Request, type Response } from 'express';
 import AppError from '../utils/AppError';
 import { HTTP_STATUS } from '../config/httpStatus';
 
@@ -6,6 +6,7 @@ const globalErrorHandler = (
   error: any,
   req: Request,
   res: Response,
+  next: NextFunction,
 ) => {
 
   if (error instanceof AppError) {

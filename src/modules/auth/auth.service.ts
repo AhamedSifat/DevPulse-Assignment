@@ -30,7 +30,14 @@ const registerUserIntoDb = async (playload: IUser) => {
   return result.rows[0];
 };
 
-const loginUserFromDb = async (payload: { email: string; password: string }) => {
+const loginUserFromDb = async (payload: { email: string; password: string } | undefined) => {
+  if (!payload) {
+    throw new AppError(
+      HTTP_STATUS.BAD_REQUEST,
+      'Email and password are required'
+    );
+  }
+
   const { email, password } = payload;
   if (!email || !password) {
     throw new AppError(
