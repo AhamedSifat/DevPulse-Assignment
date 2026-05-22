@@ -29,6 +29,19 @@ const createIssue = catchAsync(async (req: Request, res: Response) => {
   })
 });
 
+const getIssues = catchAsync(async (req: Request, res: Response) => {
+  const result = await issueService.getIssuesFromDb()
+  console.log(result)
+  sendResponse(res, {
+    statusCode: HTTP_STATUS.OK,
+    success: true,
+    message: "Issues retrieved successfully",
+    data: result
+  })
+}
+)
+
 export const issueController = {
   createIssue
+  , getIssues
 }

@@ -3,14 +3,14 @@ import AppError from '../utils/AppError';
 import jwt, { type JwtPayload } from 'jsonwebtoken';
 import env from '../config/env';
 import { pool } from '../db';
+import { HTTP_STATUS } from '../config/httpStatus';
 
 export const authenticate = async (req: Request, res: Response, next: NextFunction) => {
   const token = req.headers.authorization as string;
 
-  console.log(req.headers);
 
   if (!token) {
-    throw new AppError(401, "Missing authentication token");
+    throw new AppError(HTTP_STATUS.UNAUTHORIZED, "Missing authentication token");
   }
 
   const decode = jwt.verify(token, env.JWT_SECRET) as JwtPayload;
