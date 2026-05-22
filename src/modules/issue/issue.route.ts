@@ -5,5 +5,6 @@ const router = Router();
 
 router.post('/', authenticate, issueController.createIssue)
 router.get('/', issueController.getIssues)
+router.get('/:id', issueController.getIssueById)
 
 export default router;
