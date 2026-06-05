@@ -8,7 +8,7 @@ export default defineConfig({
 
   entry: ["src/server.ts"],
 
-  format: ["esm", "cjs"], // Keep this as ESM
+  format: ["esm"], // Keep this as ESM
 
   target: "esnext",
 

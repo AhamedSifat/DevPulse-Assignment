@@ -7,5 +7,6 @@ router.post('/', authenticate, issueController.createIssue)
 router.get('/', issueController.getIssues)
 router.get('/:id', issueController.getIssueById)
 router.delete('/:id', issueController.deleteIssue)
+router.put('/:id', authenticate, issueController.updateIssue)
 
 export default router;
